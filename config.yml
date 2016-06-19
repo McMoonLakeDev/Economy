@@ -1,0 +1,65 @@
+# MoonLakeEconomy 月色之湖经济插件
+# 作者：Month_Light
+
+# 插件版本号
+version: 1.2
+
+# 数据库配置
+MySQL:
+  
+  # 数据库的名称
+  mySQLDatabase: moonlake_economy
+
+  # 数据库的地址
+  mySQLHost: 127.0.0.1
+
+  # 数据库的端口
+  mySQLPort: 3306
+
+  # 数据库的用户名
+  mySQLUserName: root
+
+  # 数据库的密码
+  mySQLPassword: moonlake
+
+  # 数据库的表名
+  mySQLTableName: economy
+
+  # 存储自增的id
+  mySQLColumnId: id
+
+  # 存储用户的名称
+  mySQLColumnName: name
+  
+  # 存储用户的金币
+  mySQLColumnMoney: money
+  
+  # 存储用户的点券
+  mySQLColumnPoint: point
+  
+  # 存储用户的积分
+  mySQLColumnScore: score
+  
+# 经济的金币设置
+Money:
+  
+  # 金币的显示字符
+  MoneyChar: '￥'
+  
+  # 金币的小数保留位数
+  MoneyBit: 2
+
+  # 玩家初始进服的金币
+  DefaultMoney: 0.0
+
+# 经济的点券设置
+Point:
+  
+  # 玩家初始进服的点券
+  DefaultPoint: 0
+
+# 经济的积分设置
+Score:
+
+  # 玩家初始进服的积分
+  DefaultScore: 0
