@@ -17,7 +17,7 @@ public class PlayerListener implements Listener {
 		this.main = main;
 	}
 	
-	@EventHandler(priority=EventPriority.LOW, ignoreCancelled=true)
+	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
 	public void onJoin(PlayerJoinEvent event) {
 		// 玩家加入事件
 		Player player = event.getPlayer();
