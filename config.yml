@@ -2,7 +2,7 @@
 # 作者：Month_Light
 
 # 插件版本号
-version: 1.2
+version: 1.3
 
 # 数据库配置
 MySQL:
@@ -17,7 +17,7 @@ MySQL:
   mySQLPort: 3306
 
   # 数据库的用户名
-  mySQLUserName: root
+  mySQLUsername: root
 
   # 数据库的密码
   mySQLPassword: moonlake
@@ -25,41 +25,14 @@ MySQL:
   # 数据库的表名
   mySQLTableName: economy
 
-  # 存储自增的id
-  mySQLColumnId: id
+# 基础配置
+Setting:
 
-  # 存储用户的名称
-  mySQLColumnName: name
-  
-  # 存储用户的金币
-  mySQLColumnMoney: money
-  
-  # 存储用户的点券
-  mySQLColumnPoint: point
-  
-  # 存储用户的积分
-  mySQLColumnScore: score
-  
-# 经济的金币设置
-Money:
-  
-  # 金币的显示字符
-  MoneyChar: '￥'
-  
-  # 金币的小数保留位数
-  MoneyBit: 2
+  # 是否开启账户经济变动日志信息
+  Logger: true
 
-  # 玩家初始进服的金币
+  # 玩家默认进服的金币
   DefaultMoney: 0.0
 
-# 经济的点券设置
-Point:
-  
-  # 玩家初始进服的点券
+  # 玩家默认进服的点券
   DefaultPoint: 0
-
-# 经济的积分设置
-Score:
-
-  # 玩家初始进服的积分
-  DefaultScore: 0

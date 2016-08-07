@@ -1,32 +1,32 @@
 package com.minecraft.moonlake.economy.api;
 
-import com.minecraft.moonlake.economy.sql.DataSource;
 
-public interface MoonLakeEconomy extends DataSource {
+import com.minecraft.moonlake.api.MLogger;
+import com.minecraft.moonlake.economy.EconomyPlugin;
 
-	/**
-	 * 获取插件的版本号
-	 * @return 版本
-	 */
-	String getVersion();
-	
-	/**
-	 * 获取插件的作者
-	 * @return 作者
-	 */
-	String getAuthor();
-	
-	/**
-	 * 获取插件的网站
-	 * @return 网站
-	 */
-	String getWebsite();
-	
-	/**
-	 * 四舍五入保留指定小数位数
-	 * @param num 双精度浮点数
-	 * @param bit 保留位数
-	 * @return 四舍五入后的双精度浮点数
-	 */
-	double rounding(double num, int bit);
+/**
+ * Created by MoonLake on 2016/8/1.
+ */
+public interface MoonLakeEconomy {
+
+    /**
+     * 获取月色之湖插件主类实例对象
+     *
+     * @return 实例对象
+     */
+    EconomyPlugin getMain();
+
+    /**
+     * 获取月色之湖经济管理实例对象
+     *
+     * @return 管理实例对象
+     */
+    EconomyManager getManager();
+
+    /**
+     * 获取月色之湖控制台日志对象
+     *
+     * @return 日志对象
+     */
+    MLogger getMLogger();
 }

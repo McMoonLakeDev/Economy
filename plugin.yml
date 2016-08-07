@@ -1,6 +1,6 @@
 name: MoonLakeEconomy
-main: com.minecraft.moonlake.economy.Economy
-version: 1.2
+main: com.minecraft.moonlake.economy.EconomyPlugin
+version: 1.3
 author: Month_Light
+depend: [MoonLake, Vault]
 website: http://www.mcyszh.com/
-depend: [Vault]

@@ -11,5 +11,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Vault" level="project" />
     <orderEntry type="library" name="Spigot-1.10-R0.1" level="project" />
+    <orderEntry type="library" name="MoonLake" level="project" />
   </component>
 </module>

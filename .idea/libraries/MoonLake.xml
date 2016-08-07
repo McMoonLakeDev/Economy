@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="MoonLake">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/Desktop/api/MoonLake.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="file://$PROJECT_DIR$/../MoonLakePlugin/doc" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/../MoonLakePlugin/src" />
+    </SOURCES>
+  </library>
+</component>
