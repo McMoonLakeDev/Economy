@@ -2,6 +2,8 @@ package com.minecraft.moonlake.economy.api;
 
 import com.minecraft.moonlake.economy.data.PlayerEconomy;
 
+import java.util.Set;
+
 /**
  * Created by MoonLake on 2016/8/1.
  */
@@ -100,4 +102,11 @@ public interface EconomyManager {
      * @return 玩家经济
      */
     PlayerEconomy getData(String name);
+
+    /**
+     * 获取数据库的玩家经济数据集合
+     *
+     * @return 玩家经济集合
+     */
+    Set<PlayerEconomy> getDatas();
 }

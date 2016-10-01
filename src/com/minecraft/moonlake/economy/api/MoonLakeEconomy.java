@@ -1,8 +1,8 @@
 package com.minecraft.moonlake.economy.api;
 
 
-import com.minecraft.moonlake.api.MLogger;
 import com.minecraft.moonlake.economy.EconomyPlugin;
+import com.minecraft.moonlake.logger.MLogger;
 
 /**
  * Created by MoonLake on 2016/8/1.

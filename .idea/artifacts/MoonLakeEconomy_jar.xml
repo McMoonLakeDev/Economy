@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="jar" build-on-make="true" name="MoonLakeEconomy:jar">
-    <output-path>$USER_HOME$/Desktop/api/main</output-path>
+    <output-path>$USER_HOME$/Desktop/api</output-path>
     <root id="archive" name="MoonLakeEconomy.jar">
       <element id="module-output" name="MoonLakeEconomy" />
       <element id="file-copy" path="$PROJECT_DIR$/config.yml" />

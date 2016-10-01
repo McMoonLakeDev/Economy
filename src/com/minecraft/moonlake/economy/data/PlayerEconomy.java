@@ -2,20 +2,24 @@ package com.minecraft.moonlake.economy.data;
 
 public class PlayerEconomy {
 
-	private final String player;
-	private final double money;
-	private final int point;
+	private String name;
+	private double money;
+	private int point;
+
+	public PlayerEconomy() {
+
+	}
 
 	public PlayerEconomy(String name, double money, int point) {
 
-		this.player = name;
+		this.name = name;
 		this.money = money;
 		this.point = point;
 	}
 	
-	public String getPlayer() {
+	public String getName() {
 
-		return player;
+		return name;
 	}
 
 	public double getMoney() {
