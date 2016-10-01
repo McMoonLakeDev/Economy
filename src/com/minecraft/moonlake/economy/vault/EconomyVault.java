@@ -270,7 +270,7 @@ public class EconomyVault extends AbstractEconomy {
     @Override
     public boolean isEnabled() {
         
-        return this.main.isEnabled();
+        return getMain().isEnabled();
     }
 
     @SuppressWarnings("deprecation")

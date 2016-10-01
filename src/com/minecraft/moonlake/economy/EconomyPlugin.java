@@ -1,12 +1,13 @@
 package com.minecraft.moonlake.economy;
 
-import com.minecraft.moonlake.api.MLogger;
 import com.minecraft.moonlake.economy.api.EconomyManager;
 import com.minecraft.moonlake.economy.api.MoonLakeEconomy;
 import com.minecraft.moonlake.economy.listeners.EconomyListener;
 import com.minecraft.moonlake.economy.listeners.PlayerListener;
 import com.minecraft.moonlake.economy.vault.EconomyVault;
 import com.minecraft.moonlake.economy.wrapper.WrappedEconomy;
+import com.minecraft.moonlake.logger.MLogger;
+import com.minecraft.moonlake.logger.MLoggerWrapped;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -22,7 +23,7 @@ public class EconomyPlugin extends JavaPlugin implements MoonLakeEconomy {
 
     public EconomyPlugin() {
 
-        mLogger = new MLogger.Wrapped("MoonLakeEconomy");
+        mLogger = new MLoggerWrapped("MoonLakeEconomy");
     }
 
     @Override
@@ -55,19 +56,22 @@ public class EconomyPlugin extends JavaPlugin implements MoonLakeEconomy {
 
     private boolean hookVault() {
 
-        try {
+        if(getServer().getPluginManager().getPlugin("Vault") != null) {
 
-            Economy economy = new EconomyVault(this);
+            try {
 
-            getServer().getServicesManager().register(Economy.class, economy, this, ServicePriority.Normal);
+                Economy economy = new EconomyVault(this);
 
-            mLogger.info("已成功 hook 到 Vault 经济系统.");
+                getServer().getServicesManager().register(Economy.class, economy, this, ServicePriority.Highest);
 
-            return true;
-        }
-        catch (Exception e) {
+                mLogger.info("已成功 hook 到 Vault 经济系统.");
 
-            mLogger.warn("未能成功 hook 到 Vault 经济系统.");
+                return true;
+            }
+            catch (Exception e) {
+
+                mLogger.warn("未能成功 hook 到 Vault 经济系统.");
+            }
         }
         return false;
     }

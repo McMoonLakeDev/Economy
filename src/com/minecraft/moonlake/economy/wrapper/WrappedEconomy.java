@@ -1,20 +1,18 @@
 package com.minecraft.moonlake.economy.wrapper;
 
-import com.minecraft.moonlake.api.mysql.MySQLConnection;
-import com.minecraft.moonlake.api.mysql.MySQLManager;
-import com.minecraft.moonlake.api.mysql.MySQLTable;
-import com.minecraft.moonlake.api.mysql.resultset.MySQLResultSet;
 import com.minecraft.moonlake.economy.EconomyPlugin;
 import com.minecraft.moonlake.economy.api.EconomyManager;
 import com.minecraft.moonlake.economy.api.event.PlayerMoneyChangeEvent;
 import com.minecraft.moonlake.economy.api.event.PlayerPointChangeEvent;
 import com.minecraft.moonlake.economy.data.PlayerEconomy;
+import com.minecraft.moonlake.mysql.MySQLConnection;
+import com.minecraft.moonlake.mysql.MySQLFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
-import java.sql.Connection;
-import java.sql.Statement;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by MoonLake on 2016/8/1.
@@ -30,6 +28,7 @@ public class WrappedEconomy implements EconomyManager {
     private final String table;
     private final double defaultMoney;
     private final int defaultPoint;
+    private final MySQLConnection mySQLConnection;
 
     public WrappedEconomy(EconomyPlugin main) {
 
@@ -52,6 +51,7 @@ public class WrappedEconomy implements EconomyManager {
         this.defaultMoney = config.getDouble("Setting.DefaultMoney");
         this.defaultPoint = config.getInt("Setting.DefaultPoint");
 
+        this.mySQLConnection = MySQLFactory.get().connection(host, port, username, password);
         this.init();
     }
 
@@ -60,20 +60,22 @@ public class WrappedEconomy implements EconomyManager {
         return main;
     }
 
+    public MySQLConnection getConnection() {
+
+        return mySQLConnection;
+    }
+
     private void init() {
 
-        Connection connection = null;
-        Statement statement = null;
+        MySQLConnection mySQLConnection = getConnection();
 
         try {
 
-            MySQLConnection sqlConnection = MySQLManager.getConnection(host, port, "mysql", username, password);
-            sqlConnection.queryCreate().database(database).execute();
-            sqlConnection.close();
+            mySQLConnection.setDatabase("mysql", true);
+            mySQLConnection.dispatchStatement("create database if not exists " + database);
 
-            connection = getConnection().getConnection();
-            statement = connection.createStatement();
-            statement.executeUpdate(
+            mySQLConnection.setDatabase(database, true);
+            mySQLConnection.dispatchStatement(
 
                     "create table if not exists " + table + " (" +
                     "id integer not null auto_increment," +
@@ -85,24 +87,11 @@ public class WrappedEconomy implements EconomyManager {
         }
         catch (Exception e) {
 
-            getMain().getMLogger().warn("初始化月色之湖经济数据库的数据表时异常: " + e.getMessage());
+            getMain().getMLogger().warn("初始化月色之湖经济数据库或数据表时异常: " + e.getMessage());
         }
         finally {
 
-            try {
-
-                if (connection != null) {
-
-                    connection.close();
-                }
-                if (statement != null) {
-
-                    statement.close();
-                }
-            } catch (Exception e) {
-
-                getMain().getMLogger().warn("关闭数据库连接对象时异常: " + e.getMessage());
-            }
+            mySQLConnection.dispose();
         }
     }
 
@@ -115,24 +104,12 @@ public class WrappedEconomy implements EconomyManager {
     @Override
     public boolean initialization(String name) {
 
-        MySQLConnection connection = null;
+        MySQLConnection mySQLConnection = getConnection();
 
         try {
 
-            connection = getConnection();
-
-            MySQLTable table = connection.getDatabase().getTable(this.table);
-            MySQLResultSet resultSet = table.querySelect().where("name", name).execute();
-
-            if(resultSet == null || !resultSet.next()) {
-
-                table.queryInsert().field("name").field("money").field("point").value(name).value(defaultMoney).value(defaultPoint).execute();
-            }
-            if(resultSet != null) {
-
-                resultSet.close();
-            }
-            return true;
+            mySQLConnection.setDatabase(database, true);
+            mySQLConnection.dispatchPreparedStatement("insert into " + table + " (name,money,point) values (?,?,?);", name, defaultMoney, defaultPoint);
         }
         catch (Exception e) {
 
@@ -140,10 +117,7 @@ public class WrappedEconomy implements EconomyManager {
         }
         finally {
 
-            if(connection != null) {
-
-                connection.close();
-            }
+            mySQLConnection.dispose();
         }
         return false;
     }
@@ -157,22 +131,15 @@ public class WrappedEconomy implements EconomyManager {
     @Override
     public boolean hasPlayer(String name) {
 
-        MySQLConnection connection = null;
+        MySQLConnection mySQLConnection = getConnection();
 
         try {
 
-            connection = getConnection();
+            mySQLConnection.setDatabase(database, true);
 
-            MySQLTable table = connection.getDatabase().getTable(this.table);
-            MySQLResultSet resultSet = table.querySelect().where("name", name).execute();
+            Map<String, Object> result = mySQLConnection.findResult("select * from " + table + " where binary `name`=?;", name);
 
-            boolean result = resultSet != null && resultSet.next();
-
-            if(resultSet != null) {
-
-                resultSet.close();
-            }
-            return result;
+            return result != null && result.size() > 0;
         }
         catch (Exception e) {
 
@@ -180,10 +147,7 @@ public class WrappedEconomy implements EconomyManager {
         }
         finally {
 
-            if(connection != null) {
-
-                connection.close();
-            }
+            mySQLConnection.dispose();
         }
         return false;
     }
@@ -197,22 +161,18 @@ public class WrappedEconomy implements EconomyManager {
     @Override
     public double getMoney(String name) {
 
-        MySQLConnection connection = null;
+        MySQLConnection mySQLConnection = getConnection();
 
         try {
 
-            connection = getConnection();
+            mySQLConnection.setDatabase(database, true);
 
-            MySQLTable table = connection.getDatabase().getTable(this.table);
-            MySQLResultSet resultSet = table.querySelect().where("name", name).execute();
+            Object value = mySQLConnection.findSimpleResult("money", "select money from " + table + " where binary `name`=?;", name);
 
-            double money = resultSet != null && resultSet.next() ? resultSet.getDouble("money") : 0d;
+            if(value != null && value instanceof Double) {
 
-            if(resultSet != null) {
-
-                resultSet.close();
+                return (double) value;
             }
-            return money;
         }
         catch (Exception e) {
 
@@ -220,10 +180,7 @@ public class WrappedEconomy implements EconomyManager {
         }
         finally {
 
-            if(connection != null) {
-
-                connection.close();
-            }
+            mySQLConnection.dispose();
         }
         return 0d;
     }
@@ -237,22 +194,18 @@ public class WrappedEconomy implements EconomyManager {
     @Override
     public int getPoint(String name) {
 
-        MySQLConnection connection = null;
+        MySQLConnection mySQLConnection = getConnection();
 
         try {
 
-            connection = getConnection();
+            mySQLConnection.setDatabase(database, true);
 
-            MySQLTable table = connection.getDatabase().getTable(this.table);
-            MySQLResultSet resultSet = table.querySelect().where("name", name).execute();
+            Object value = mySQLConnection.findSimpleResult("point", "select point from " + table + " where binary `name`=?;", name);
 
-            int point = resultSet != null && resultSet.next() ? resultSet.getInt("point") : 0;
+            if(value != null && value instanceof Integer) {
 
-            if(resultSet != null) {
-
-                resultSet.close();
+                return (int) value;
             }
-            return point;
         }
         catch (Exception e) {
 
@@ -260,10 +213,7 @@ public class WrappedEconomy implements EconomyManager {
         }
         finally {
 
-            if(connection != null) {
-
-                connection.close();
-            }
+            mySQLConnection.dispose();
         }
         return 0;
     }
@@ -278,27 +228,21 @@ public class WrappedEconomy implements EconomyManager {
     @Override
     public boolean setMoney(String name, double money) {
 
-        MySQLConnection connection = null;
+        MySQLConnection mySQLConnection = getConnection();
 
         try {
 
-            connection = getConnection();
+            mySQLConnection.setDatabase(database, true);
 
-            MySQLTable table = connection.getDatabase().getTable(this.table);
-            MySQLResultSet resultSet = table.querySelect().where("name", name).execute();
+            double oldMoney = 0d;
+            Object value = mySQLConnection.findSimpleResult("money", "select money from " + table + " where binary `name`=?;", name);
 
-            table.queryUpdate().set("money", money).where("name", name).execute();
+            if(value != null && value instanceof Double) {
 
-            double oldMoney = 0;
-
-            if(resultSet != null && resultSet.next()) {
-
-                oldMoney = resultSet.getDouble("money");
+                oldMoney = (double) value;
             }
-            if(resultSet != null) {
+            mySQLConnection.dispatchPreparedStatement("update set money=? where binary `name`=?;", money, name);
 
-                resultSet.close();
-            }
             PlayerMoneyChangeEvent pmce = new PlayerMoneyChangeEvent(name, oldMoney, money);
             Bukkit.getServer().getPluginManager().callEvent(pmce);
 
@@ -310,10 +254,7 @@ public class WrappedEconomy implements EconomyManager {
         }
         finally {
 
-            if(connection != null) {
-
-                connection.close();
-            }
+            mySQLConnection.dispose();
         }
         return false;
     }
@@ -328,27 +269,21 @@ public class WrappedEconomy implements EconomyManager {
     @Override
     public boolean setPoint(String name, int point) {
 
-        MySQLConnection connection = null;
+        MySQLConnection mySQLConnection = getConnection();
 
         try {
 
-            connection = getConnection();
-
-            MySQLTable table = connection.getDatabase().getTable(this.table);
-            MySQLResultSet resultSet = table.querySelect().where("name", name).execute();
-
-            table.queryUpdate().set("point", point).where("name", name).execute();
+            mySQLConnection.setDatabase(database, true);
 
             int oldPoint = 0;
+            Object value = mySQLConnection.findSimpleResult("point", "select point from " + table + " where binary `name`=?;", name);
 
-            if(resultSet != null && resultSet.next()) {
+            if(value != null && value instanceof Integer) {
 
-                oldPoint = resultSet.getInt("point");
+                oldPoint = (int) value;
             }
-            if(resultSet != null) {
+            mySQLConnection.dispatchPreparedStatement("update set point=? where binary `name`=?;", point, name);
 
-                resultSet.close();
-            }
             PlayerPointChangeEvent ppce = new PlayerPointChangeEvent(name, oldPoint, point);
             Bukkit.getServer().getPluginManager().callEvent(ppce);
 
@@ -360,10 +295,7 @@ public class WrappedEconomy implements EconomyManager {
         }
         finally {
 
-            if(connection != null) {
-
-                connection.close();
-            }
+            mySQLConnection.dispose();
         }
         return false;
     }
@@ -378,27 +310,21 @@ public class WrappedEconomy implements EconomyManager {
     @Override
     public boolean giveMoney(String name, double money) {
 
-        MySQLConnection connection = null;
+        MySQLConnection mySQLConnection = getConnection();
 
         try {
 
-            connection = getConnection();
+            mySQLConnection.setDatabase(database, true);
 
-            MySQLTable table = connection.getDatabase().getTable(this.table);
-            MySQLResultSet resultSet = table.querySelect().where("name", name).execute();
+            double oldMoney = 0d;
+            Object value = mySQLConnection.findSimpleResult("money", "select money from " + table + " where binary `name`=?;", name);
 
-            table.queryUpdate().add("money", money).where("name", name).execute();
+            if(value != null && value instanceof Double) {
 
-            double oldMoney = 0;
-
-            if(resultSet != null && resultSet.next()) {
-
-                oldMoney = resultSet.getDouble("money");
+                oldMoney = (double) value;
             }
-            if(resultSet != null) {
+            mySQLConnection.dispatchPreparedStatement("update set money=money+? where binary `name`=?;", money, name);
 
-                resultSet.close();
-            }
             PlayerMoneyChangeEvent pmce = new PlayerMoneyChangeEvent(name, oldMoney, oldMoney + money);
             Bukkit.getServer().getPluginManager().callEvent(pmce);
 
@@ -410,10 +336,7 @@ public class WrappedEconomy implements EconomyManager {
         }
         finally {
 
-            if(connection != null) {
-
-                connection.close();
-            }
+            mySQLConnection.dispose();
         }
         return false;
     }
@@ -428,27 +351,21 @@ public class WrappedEconomy implements EconomyManager {
     @Override
     public boolean givePoint(String name, int point) {
 
-        MySQLConnection connection = null;
+        MySQLConnection mySQLConnection = getConnection();
 
         try {
 
-            connection = getConnection();
-
-            MySQLTable table = connection.getDatabase().getTable(this.table);
-            MySQLResultSet resultSet = table.querySelect().where("name", name).execute();
-
-            table.queryUpdate().add("point", point).where("name", name).execute();
+            mySQLConnection.setDatabase(database, true);
 
             int oldPoint = 0;
+            Object value = mySQLConnection.findSimpleResult("point", "select point from " + table + " where binary `name`=?;", name);
 
-            if(resultSet != null && resultSet.next()) {
+            if(value != null && value instanceof Integer) {
 
-                oldPoint = resultSet.getInt("point");
+                oldPoint = (int) value;
             }
-            if(resultSet != null) {
+            mySQLConnection.dispatchPreparedStatement("update set point=point+? where binary `name`=?;", point, name);
 
-                resultSet.close();
-            }
             PlayerPointChangeEvent ppce = new PlayerPointChangeEvent(name, oldPoint, oldPoint + point);
             Bukkit.getServer().getPluginManager().callEvent(ppce);
 
@@ -460,10 +377,7 @@ public class WrappedEconomy implements EconomyManager {
         }
         finally {
 
-            if(connection != null) {
-
-                connection.close();
-            }
+            mySQLConnection.dispose();
         }
         return false;
     }
@@ -478,27 +392,21 @@ public class WrappedEconomy implements EconomyManager {
     @Override
     public boolean takeMoney(String name, double money) {
 
-        MySQLConnection connection = null;
+        MySQLConnection mySQLConnection = getConnection();
 
         try {
 
-            connection = getConnection();
+            mySQLConnection.setDatabase(database, true);
 
-            MySQLTable table = connection.getDatabase().getTable(this.table);
-            MySQLResultSet resultSet = table.querySelect().where("name", name).execute();
+            double oldMoney = 0d;
+            Object value = mySQLConnection.findSimpleResult("money", "select money from " + table + " where binary `name`=?;", name);
 
-            table.queryUpdate().subtract("money", money).where("name", name).execute();
+            if(value != null && value instanceof Double) {
 
-            double oldMoney = 0;
-
-            if(resultSet != null && resultSet.next()) {
-
-                oldMoney = resultSet.getDouble("money");
+                oldMoney = (double) value;
             }
-            if(resultSet != null) {
+            mySQLConnection.dispatchPreparedStatement("update set money=money-? where binary `name`=?;", money, name);
 
-                resultSet.close();
-            }
             PlayerMoneyChangeEvent pmce = new PlayerMoneyChangeEvent(name, oldMoney, oldMoney - money);
             Bukkit.getServer().getPluginManager().callEvent(pmce);
 
@@ -510,10 +418,7 @@ public class WrappedEconomy implements EconomyManager {
         }
         finally {
 
-            if(connection != null) {
-
-                connection.close();
-            }
+            mySQLConnection.dispose();
         }
         return false;
     }
@@ -528,27 +433,21 @@ public class WrappedEconomy implements EconomyManager {
     @Override
     public boolean takePoint(String name, int point) {
 
-        MySQLConnection connection = null;
+        MySQLConnection mySQLConnection = getConnection();
 
         try {
 
-            connection = getConnection();
-
-            MySQLTable table = connection.getDatabase().getTable(this.table);
-            MySQLResultSet resultSet = table.querySelect().where("name", name).execute();
-
-            table.queryUpdate().subtract("point", point).where("name", name).execute();
+            mySQLConnection.setDatabase(database, true);
 
             int oldPoint = 0;
+            Object value = mySQLConnection.findSimpleResult("point", "select point from " + table + " where binary `name`=?;", name);
 
-            if(resultSet != null && resultSet.next()) {
+            if(value != null && value instanceof Integer) {
 
-                oldPoint = resultSet.getInt("point");
+                oldPoint = (int) value;
             }
-            if(resultSet != null) {
+            mySQLConnection.dispatchPreparedStatement("update set point=point-? where binary `name`=?;", point, name);
 
-                resultSet.close();
-            }
             PlayerPointChangeEvent ppce = new PlayerPointChangeEvent(name, oldPoint, oldPoint - point);
             Bukkit.getServer().getPluginManager().callEvent(ppce);
 
@@ -560,10 +459,7 @@ public class WrappedEconomy implements EconomyManager {
         }
         finally {
 
-            if(connection != null) {
-
-                connection.close();
-            }
+            mySQLConnection.dispose();
         }
         return false;
     }
@@ -577,26 +473,13 @@ public class WrappedEconomy implements EconomyManager {
     @Override
     public PlayerEconomy getData(String name) {
 
-        MySQLConnection connection = null;
+        MySQLConnection mySQLConnection = getConnection();
 
         try {
 
-            connection = getConnection();
+            mySQLConnection.setDatabase(database, true);
 
-            MySQLTable table = connection.getDatabase().getTable(this.table);
-            MySQLResultSet resultSet = table.querySelect().where("name", name).execute();
-
-            PlayerEconomy playerEconomy = null;
-
-            if(resultSet != null && resultSet.next()) {
-
-                playerEconomy = new PlayerEconomy(name, resultSet.getDouble("money"), resultSet.getInt("point"));
-            }
-            if(resultSet != null) {
-
-                resultSet.close();
-            }
-            return playerEconomy;
+            return mySQLConnection.findResult(PlayerEconomy.class, "select name,money,point from " + table + " where binary `name`=?;", name);
         }
         catch (Exception e) {
 
@@ -604,19 +487,30 @@ public class WrappedEconomy implements EconomyManager {
         }
         finally {
 
-            if(connection != null) {
-
-                connection.close();
-            }
+            mySQLConnection.dispose();
         }
         return null;
     }
 
-    private MySQLConnection getConnection() {
+    @Override
+    public Set<PlayerEconomy> getDatas() {
 
-        MySQLConnection connection = MySQLManager.getConnection(host, port, database, username, password);
-        connection.open();
+        MySQLConnection mySQLConnection = getConnection();
 
-        return connection;
+        try {
+
+            mySQLConnection.setDatabase(database, true);
+
+            return mySQLConnection.findResults(PlayerEconomy.class, "select name,money,point from " + table + ";");
+        }
+        catch (Exception e) {
+
+            getMain().getMLogger().warn("获取玩家经济数据时异常: " + e.getMessage());
+        }
+        finally {
+
+            mySQLConnection.dispose();
+        }
+        return null;
     }
 }
