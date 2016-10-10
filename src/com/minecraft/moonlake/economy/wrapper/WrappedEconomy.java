@@ -20,11 +20,7 @@ import java.util.Set;
 public class WrappedEconomy implements EconomyManager {
 
     private final EconomyPlugin main;
-    private final String host;
-    private final int port;
     private final String database;
-    private final String username;
-    private final String password;
     private final String table;
     private final double defaultMoney;
     private final int defaultPoint;
@@ -42,16 +38,17 @@ public class WrappedEconomy implements EconomyManager {
         }
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 
-        this.host = config.getString("MySQL.mySQLHost");
-        this.port = config.getInt("MySQL.mySQLPort");
         this.table = config.getString("MySQL.mySQLTableName");
         this.database = config.getString("MySQL.mySQLDatabase");
-        this.username = config.getString("MySQL.mySQLUsername");
-        this.password = config.getString("MySQL.mySQLPassword");
         this.defaultMoney = config.getDouble("Setting.DefaultMoney");
         this.defaultPoint = config.getInt("Setting.DefaultPoint");
 
-        this.mySQLConnection = MySQLFactory.get().connection(host, port, username, password);
+        int port = config.getInt("MySQL.mySQLPort");
+        String host = config.getString("MySQL.mySQLHost");
+        String username = config.getString("MySQL.mySQLUsername");
+        String password = config.getString("MySQL.mySQLPassword");
+
+        this.mySQLConnection = MySQLFactory.connection(host, port, username, password);
         this.init();
     }
 
@@ -60,7 +57,7 @@ public class WrappedEconomy implements EconomyManager {
         return main;
     }
 
-    public MySQLConnection getConnection() {
+    private MySQLConnection getConnection() {
 
         return mySQLConnection;
     }
@@ -72,7 +69,7 @@ public class WrappedEconomy implements EconomyManager {
         try {
 
             mySQLConnection.setDatabase("mysql", true);
-            mySQLConnection.dispatchStatement("create database if not exists " + database);
+            mySQLConnection.createDatabase(database, true);
 
             mySQLConnection.setDatabase(database, true);
             mySQLConnection.dispatchStatement(
@@ -109,7 +106,12 @@ public class WrappedEconomy implements EconomyManager {
         try {
 
             mySQLConnection.setDatabase(database, true);
-            mySQLConnection.dispatchPreparedStatement("insert into " + table + " (name,money,point) values (?,?,?);", name, defaultMoney, defaultPoint);
+
+            if(mySQLConnection.findSimpleResult("name", "select name from " + table + " where binary `name`=?;", name) != null) {
+
+                return true;
+            }
+            return mySQLConnection.dispatchPreparedStatement("insert into " + table + " (name,money,point) values (?,?,?);", name, defaultMoney, defaultPoint);
         }
         catch (Exception e) {
 
