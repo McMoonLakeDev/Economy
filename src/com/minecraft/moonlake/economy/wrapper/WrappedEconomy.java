@@ -343,7 +343,7 @@ public class WrappedEconomy implements EconomyManager {
 
                 oldMoney = ((Number) value).doubleValue();
             }
-            mySQLConnection.dispatchPreparedStatement("update set " + table + " money=money+? where binary `name`=?;", money, name);
+            mySQLConnection.dispatchPreparedStatement("update " + table + " set money=money+? where binary `name`=?;", money, name);
 
             PlayerMoneyChangeEvent pmce = new PlayerMoneyChangeEvent(name, oldMoney, oldMoney + money);
             Bukkit.getServer().getPluginManager().callEvent(pmce);
