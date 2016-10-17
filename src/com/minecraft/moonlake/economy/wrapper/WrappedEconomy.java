@@ -189,9 +189,9 @@ public class WrappedEconomy implements EconomyManager {
 
             Object value = mySQLConnection.findSimpleResult("money", "select money from " + table + " where binary `name`=?;", name);
 
-            if(value != null && value instanceof Double) {
+            if(value != null && value instanceof Number) {
 
-                return (double) value;
+                return ((Number) value).doubleValue();
             }
         }
         catch (Exception e) {
@@ -222,9 +222,9 @@ public class WrappedEconomy implements EconomyManager {
 
             Object value = mySQLConnection.findSimpleResult("point", "select point from " + table + " where binary `name`=?;", name);
 
-            if(value != null && value instanceof Integer) {
+            if(value != null && value instanceof Number) {
 
-                return (int) value;
+                return ((Number) value).intValue();
             }
         }
         catch (Exception e) {
@@ -257,11 +257,11 @@ public class WrappedEconomy implements EconomyManager {
             double oldMoney = 0d;
             Object value = mySQLConnection.findSimpleResult("money", "select money from " + table + " where binary `name`=?;", name);
 
-            if(value != null && value instanceof Double) {
+            if(value != null && value instanceof Number) {
 
-                oldMoney = (double) value;
+                oldMoney = ((Number) value).doubleValue();
             }
-            mySQLConnection.dispatchPreparedStatement("update set money=? where binary `name`=?;", money, name);
+            mySQLConnection.dispatchPreparedStatement("update " + table + " set money=? where binary `name`=?;", money, name);
 
             PlayerMoneyChangeEvent pmce = new PlayerMoneyChangeEvent(name, oldMoney, money);
             Bukkit.getServer().getPluginManager().callEvent(pmce);
@@ -298,11 +298,11 @@ public class WrappedEconomy implements EconomyManager {
             int oldPoint = 0;
             Object value = mySQLConnection.findSimpleResult("point", "select point from " + table + " where binary `name`=?;", name);
 
-            if(value != null && value instanceof Integer) {
+            if(value != null && value instanceof Number) {
 
-                oldPoint = (int) value;
+                oldPoint = ((Number) value).intValue();
             }
-            mySQLConnection.dispatchPreparedStatement("update set point=? where binary `name`=?;", point, name);
+            mySQLConnection.dispatchPreparedStatement("update " + table + " set point=? where binary `name`=?;", point, name);
 
             PlayerPointChangeEvent ppce = new PlayerPointChangeEvent(name, oldPoint, point);
             Bukkit.getServer().getPluginManager().callEvent(ppce);
@@ -339,11 +339,11 @@ public class WrappedEconomy implements EconomyManager {
             double oldMoney = 0d;
             Object value = mySQLConnection.findSimpleResult("money", "select money from " + table + " where binary `name`=?;", name);
 
-            if(value != null && value instanceof Double) {
+            if(value != null && value instanceof Number) {
 
-                oldMoney = (double) value;
+                oldMoney = ((Number) value).doubleValue();
             }
-            mySQLConnection.dispatchPreparedStatement("update set money=money+? where binary `name`=?;", money, name);
+            mySQLConnection.dispatchPreparedStatement("update set " + table + " money=money+? where binary `name`=?;", money, name);
 
             PlayerMoneyChangeEvent pmce = new PlayerMoneyChangeEvent(name, oldMoney, oldMoney + money);
             Bukkit.getServer().getPluginManager().callEvent(pmce);
@@ -380,11 +380,11 @@ public class WrappedEconomy implements EconomyManager {
             int oldPoint = 0;
             Object value = mySQLConnection.findSimpleResult("point", "select point from " + table + " where binary `name`=?;", name);
 
-            if(value != null && value instanceof Integer) {
+            if(value != null && value instanceof Number) {
 
-                oldPoint = (int) value;
+                oldPoint = ((Number) value).intValue();
             }
-            mySQLConnection.dispatchPreparedStatement("update set point=point+? where binary `name`=?;", point, name);
+            mySQLConnection.dispatchPreparedStatement("update " + table + " set point=point+? where binary `name`=?;", point, name);
 
             PlayerPointChangeEvent ppce = new PlayerPointChangeEvent(name, oldPoint, oldPoint + point);
             Bukkit.getServer().getPluginManager().callEvent(ppce);
@@ -421,11 +421,11 @@ public class WrappedEconomy implements EconomyManager {
             double oldMoney = 0d;
             Object value = mySQLConnection.findSimpleResult("money", "select money from " + table + " where binary `name`=?;", name);
 
-            if(value != null && value instanceof Double) {
+            if(value != null && value instanceof Number) {
 
-                oldMoney = (double) value;
+                oldMoney = ((Number) value).doubleValue();
             }
-            mySQLConnection.dispatchPreparedStatement("update set money=money-? where binary `name`=?;", money, name);
+            mySQLConnection.dispatchPreparedStatement("update " + table + " set money=money-? where binary `name`=?;", money, name);
 
             PlayerMoneyChangeEvent pmce = new PlayerMoneyChangeEvent(name, oldMoney, oldMoney - money);
             Bukkit.getServer().getPluginManager().callEvent(pmce);
@@ -462,11 +462,11 @@ public class WrappedEconomy implements EconomyManager {
             int oldPoint = 0;
             Object value = mySQLConnection.findSimpleResult("point", "select point from " + table + " where binary `name`=?;", name);
 
-            if(value != null && value instanceof Integer) {
+            if(value != null && value instanceof Number) {
 
-                oldPoint = (int) value;
+                oldPoint = ((Number) value).intValue();
             }
-            mySQLConnection.dispatchPreparedStatement("update set point=point-? where binary `name`=?;", point, name);
+            mySQLConnection.dispatchPreparedStatement("update " + table + " set point=point-? where binary `name`=?;", point, name);
 
             PlayerPointChangeEvent ppce = new PlayerPointChangeEvent(name, oldPoint, oldPoint - point);
             Bukkit.getServer().getPluginManager().callEvent(ppce);
