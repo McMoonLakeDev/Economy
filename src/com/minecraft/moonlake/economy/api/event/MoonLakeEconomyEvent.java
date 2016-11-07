@@ -18,35 +18,10 @@
 
 package com.minecraft.moonlake.economy.api.event;
 
-import org.bukkit.event.HandlerList;
+import com.minecraft.moonlake.api.event.MoonLakeEvent;
 
-public class MoonLakePlayerPointChangeEvent extends MoonLakePlayerEconomyEvent {
+public abstract class MoonLakeEconomyEvent extends MoonLakeEvent {
 
-    private final static HandlerList handlerList = new HandlerList();
-    private int oldPoint;
-    private int newPoint;
-
-    public MoonLakePlayerPointChangeEvent(String player, int oldPoint, int newPoint) {
-        super(player);
-
-        this.oldPoint = oldPoint;
-        this.newPoint = newPoint;
-    }
-
-    public int getOldPoint() {
-        return oldPoint;
-    }
-
-    public int getNewPoint() {
-        return newPoint;
-    }
-
-    @Override
-    public HandlerList getHandlers() {
-        return handlerList;
-    }
-
-    public static HandlerList getHandlerList() {
-        return handlerList;
+    public MoonLakeEconomyEvent() {
     }
 }

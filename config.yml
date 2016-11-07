@@ -4,11 +4,14 @@
 # 插件版本号
 version: 2.0
 
+# 插件前缀
+Prefix: '&3MoonLake &7>> &r'
+
 # 数据库配置
 MySQL:
   
   # 数据库的名称
-  mySQLDatabase: moonlake_economy
+  mySQLDatabase: moonlake
 
   # 数据库的地址
   mySQLHost: 127.0.0.1
@@ -27,6 +30,9 @@ MySQL:
 
 # 基础配置
 Setting:
+
+  # 是否开启 Debug 模式
+  Debug: true
 
   # 是否开启账户经济变动日志信息
   Logger: true

@@ -25,17 +25,20 @@ import com.minecraft.moonlake.economy.commands.CommandEconomy;
 import com.minecraft.moonlake.economy.config.EconomyConfig;
 import com.minecraft.moonlake.economy.listeners.EconomyListener;
 import com.minecraft.moonlake.economy.listeners.PlayerListener;
+import com.minecraft.moonlake.economy.vault.MoonLakeEconomyVault;
 import com.minecraft.moonlake.economy.vault.MoonLakeEconomyVaultWrapped;
 import com.minecraft.moonlake.event.EventHelper;
 import com.minecraft.moonlake.logger.MLogger;
 import com.minecraft.moonlake.logger.MLoggerWrapped;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class EconomyPlugin extends JavaPlugin {
 
     private final MLogger mLogger;
     private MoonLakeEconomy economy;
+    private MoonLakeEconomyVault economyVault;
     private EconomyConfig configuration;
     private EconomyListener economyListener;
 
@@ -52,8 +55,12 @@ public class EconomyPlugin extends JavaPlugin {
         }
         this.configuration = new EconomyConfig(this);
         this.configuration.reload();
-        this.economy = new MoonLakeEconomyVaultWrapped(this);
+        this.economy = this.economyVault = new MoonLakeEconomyVaultWrapped(this);
 
+        if(!hookVault()) {
+            this.getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
         PluginAnnotationFactory.get().command().registerCommand(this, new CommandEconomy(this));
         EventHelper.registerEvent(new PlayerListener(this), this);
 
@@ -94,5 +101,20 @@ public class EconomyPlugin extends JavaPlugin {
     private boolean setupMoonLake() {
         Plugin plugin = this.getServer().getPluginManager().getPlugin("MoonLake");
         return plugin != null && plugin instanceof MoonLakePlugin;
+    }
+
+    private boolean hookVault() {
+        if(getServer().getPluginManager().getPlugin("Vault") != null) {
+            try {
+                getServer().getServicesManager().register(net.milkbowl.vault.economy.Economy.class, economyVault, this, ServicePriority.Highest);
+                getMLogger().info("成功 hook 到 Vault 经济系统.");
+
+                return true;
+            }
+            catch (Exception e) {
+                getMLogger().error("未成功 hook 到 Vault 经济系统.");
+            }
+        }
+        return false;
     }
 }

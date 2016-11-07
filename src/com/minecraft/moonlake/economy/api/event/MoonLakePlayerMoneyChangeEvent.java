@@ -18,7 +18,6 @@
 
 package com.minecraft.moonlake.economy.api.event;
 
-import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 
 public class MoonLakePlayerMoneyChangeEvent extends MoonLakePlayerEconomyEvent {
@@ -27,7 +26,7 @@ public class MoonLakePlayerMoneyChangeEvent extends MoonLakePlayerEconomyEvent {
     private double oldMoney;
     private double newMoney;
 
-    public MoonLakePlayerMoneyChangeEvent(Player player, double oldMoney, double newMoney) throws IllegalArgumentException {
+    public MoonLakePlayerMoneyChangeEvent(String player, double oldMoney, double newMoney) {
         super(player);
 
         this.oldMoney = oldMoney;

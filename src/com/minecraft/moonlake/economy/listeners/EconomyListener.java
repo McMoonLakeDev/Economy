@@ -23,6 +23,7 @@ import com.minecraft.moonlake.economy.EconomyPlugin;
 import com.minecraft.moonlake.economy.api.event.MoonLakePlayerMoneyChangeEvent;
 import com.minecraft.moonlake.economy.api.event.MoonLakePlayerPointChangeEvent;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 
 public class EconomyListener implements MoonLakeListener {
 
@@ -36,13 +37,13 @@ public class EconomyListener implements MoonLakeListener {
         return main;
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOW)
     public void onMoney(MoonLakePlayerMoneyChangeEvent event) {
-
+        getMain().getMLogger().info("玩家 " + event.getName() + " 的经济账户金币变动: " + event.getOldMoney() + " -> " + event.getNewMoney());
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOW)
     public void onPoint(MoonLakePlayerPointChangeEvent event) {
-
+        getMain().getMLogger().info("玩家 " + event.getName() + " 的经济账户点券变动: " + event.getOldPoint() + " -> " + event.getNewPoint());
     }
 }

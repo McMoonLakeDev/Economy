@@ -26,6 +26,9 @@ import java.io.File;
 
 public class EconomyConfig {
 
+    @ConfigValue(path = "Prefix", colorChar = '&')
+    private String prefix;
+
     @ConfigValue(path = "MySQL.mySQLDatabase")
     private String mySQLDatabase;
 
@@ -33,7 +36,7 @@ public class EconomyConfig {
     private String mySQLHost;
 
     @ConfigValue(path = "MySQL.mySQLPort")
-    private String mySQLPort;
+    private int mySQLPort;
 
     @ConfigValue(path = "MySQL.mySQLUsername")
     private String mySQLUsername;
@@ -41,8 +44,11 @@ public class EconomyConfig {
     @ConfigValue(path = "MySQL.mySQLPassword")
     private String mySQLPassword;
 
-    @ConfigValue(path = "MySQL.mySQLTablename")
-    private String mySQLTablename;
+    @ConfigValue(path = "MySQL.mySQLTableName")
+    private String mySQLTableName;
+
+    @ConfigValue(path = "Setting.Debug")
+    private boolean debug;
 
     @ConfigValue(path = "Setting.Logger")
     private boolean changeLogger;
@@ -74,6 +80,10 @@ public class EconomyConfig {
         return true;
     }
 
+    public String getPrefix() {
+        return prefix;
+    }
+
     public String getMySQLDatabase() {
         return mySQLDatabase;
     }
@@ -82,7 +92,7 @@ public class EconomyConfig {
         return mySQLHost;
     }
 
-    public String getMySQLPort() {
+    public int getMySQLPort() {
         return mySQLPort;
     }
 
@@ -94,8 +104,12 @@ public class EconomyConfig {
         return mySQLPassword;
     }
 
-    public String getMySQLTablename() {
-        return mySQLTablename;
+    public String getMySQLTableName() {
+        return mySQLTableName;
+    }
+
+    public boolean isDebug() {
+        return debug;
     }
 
     public boolean isChangeLogger() {

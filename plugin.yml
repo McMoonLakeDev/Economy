@@ -3,4 +3,5 @@ main: com.minecraft.moonlake.economy.EconomyPlugin
 version: 2.0
 author: Month_Light
 depend: [MoonLake]
+softdepend: [Vault]
 website: http://www.mcyszh.com/

@@ -18,12 +18,15 @@
 
 package com.minecraft.moonlake.economy.api.event;
 
-import com.minecraft.moonlake.api.event.player.MoonLakePlayerEvent;
-import org.bukkit.entity.Player;
+public abstract class MoonLakePlayerEconomyEvent extends MoonLakeEconomyEvent {
 
-public abstract class MoonLakePlayerEconomyEvent extends MoonLakePlayerEvent {
+    private final String player;
 
-    public MoonLakePlayerEconomyEvent(Player player) throws IllegalArgumentException {
-        super(player);
+    public MoonLakePlayerEconomyEvent(String player) {
+        this.player = player;
+    }
+
+    public final String getName() {
+        return player;
     }
 }
